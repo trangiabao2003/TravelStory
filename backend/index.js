@@ -61,35 +61,35 @@ app.post("/create-account", async (req, res) => {
 	});
 });
 
-// // Login
-// app.post("/login", async (req, res) => {
-// 	const { email, password } = req.body;
-// 	if (!email || !password) {
-// 		return res.status(400).json({ message: "Email and Password are required" });
-// 	}
+// Login
+app.post("/login", async (req, res) => {
+	const { email, password } = req.body;
+	if (!email || !password) {
+		return res.status(400).json({ message: "Email and Password are required" });
+	}
 
-// 	const user = await User.findOne({ email });
-// 	if (!user) {
-// 		return res.status(400).json({ message: "User not found" });
-// 	}
+	const user = await User.findOne({ email });
+	if (!user) {
+		return res.status(400).json({ message: "User not found" });
+	}
 
-// 	const isPasswordValid = await bcrypt.compare(password, user.password);
-// 	if (!isPasswordValid) {
-// 		return res.status(400).json({ message: "Invalid Credentials" });
-// 	}
+	const isPasswordValid = await bcrypt.compare(password, user.password);
+	if (!isPasswordValid) {
+		return res.status(400).json({ message: "Invalid Credentials" });
+	}
 
-// 	const accessToken = jwt.sign(
-// 		{ userId: user._id },
-// 		process.env.ACCESS_TOKEN_SECRET,
-// 		{ expiresIn: "72h" }
-// 	);
-// 	return res.json({
-// 		error: false,
-// 		message: "Login Successful",
-// 		user: { fullName: user.fullName, email: user.email },
-// 		accessToken,
-// 	});
-// });
+	const accessToken = jwt.sign(
+		{ userId: user._id },
+		process.env.ACCESS_TOKEN_SECRET,
+		{ expiresIn: "72h" }
+	);
+	return res.json({
+		error: false,
+		message: "Login Successful",
+		user: { fullName: user.fullName, email: user.email },
+		accessToken,
+	});
+});
 
 // // Get User
 // app.get("/get-user", authenticateToken, async (req, res) => {
