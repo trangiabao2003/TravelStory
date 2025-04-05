@@ -104,22 +104,22 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 	});
 });
 
-// // Route to handle image upload
-// app.post("/image-upload", upload.single("image"), async (req, res) => {
-// 	try {
-// 		if (!req.file) {
-// 			return res
-// 				.status(400)
-// 				.json({ error: true, message: "No image uploaded" });
-// 		}
+// Route to handle image upload
+app.post("/image-upload", upload.single("image"), async (req, res) => {
+	try {
+		if (!req.file) {
+			return res
+				.status(400)
+				.json({ error: true, message: "No image uploaded" });
+		}
 
-// 		const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+		const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
 
-// 		res.status(201).json({ imageUrl });
-// 	} catch (error) {
-// 		res.status(500).json({ error: true, message: error.message });
-// 	}
-// });
+		res.status(201).json({ imageUrl });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
 
 // // Delete an image from uploads folder
 // app.delete("/delete-image", async (req, res) => {
@@ -150,9 +150,9 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 // 		res.status(500).json({ error: true, message: error.message });
 // 	}
 // });
-// // Serve static files from the uploads and assets directory
-// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-// app.use("/assets", express.static(path.join(__dirname, "assets")));
+// Serve static files from the uploads and assets directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 // Add Travel Story
 app.post("/add-travel-story", authenticateToken, async (req, res) => {
