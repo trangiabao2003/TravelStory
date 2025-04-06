@@ -243,45 +243,45 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
 	}
 });
 
-// // Delete a travel story
-// app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
-// 	const { id } = req.params;
-// 	const { userId } = req.user;
+// Delete a travel story
+app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
+	const { id } = req.params;
+	const { userId } = req.user;
 
-// 	try {
-// 		// Find the travel story by ID and ensure it belongs to the authenticated user
-// 		const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
+	try {
+		// Find the travel story by ID and ensure it belongs to the authenticated user
+		const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
 
-// 		if (!travelStory) {
-// 			return res
-// 				.status(404)
-// 				.json({ error: true, message: "Travel story not found" });
-// 		}
+		if (!travelStory) {
+			return res
+				.status(404)
+				.json({ error: true, message: "Travel story not found" });
+		}
 
-// 		// Delete the travel story from the database
-// 		await travelStory.deleteOne({ _id: id, userId: userId });
+		// Delete the travel story from the database
+		await travelStory.deleteOne({ _id: id, userId: userId });
 
-// 		// Extract the filename from the imageUrl
-// 		const imageUrl = travelStory.imageUrl;
-// 		const filename = path.basename(imageUrl);
+		// Extract the filename from the imageUrl
+		const imageUrl = travelStory.imageUrl;
+		const filename = path.basename(imageUrl);
 
-// 		// Define the file path
-// 		const filePath = path.join(__dirname, "uploads", filename);
+		// Define the file path
+		const filePath = path.join(__dirname, "uploads", filename);
 
-// 		// Delete the image file from the uploads folder
-// 		fs.unlinkSync(filePath, (err) => {
-// 			if (err) {
-// 				console.error("Failed to delete image file:", err);
-// 				// Optionally, you could still respond with a success status here
-// 				// If you don't want to treat this as a critical error
-// 			}
-// 		});
+		// Delete the image file from the uploads folder
+		fs.unlinkSync(filePath, (err) => {
+			if (err) {
+				console.error("Failed to delete image file:", err);
+				// Optionally, you could still respond with a success status here
+				// If you don't want to treat this as a critical error
+			}
+		});
 
-// 		res.status(200).json({ message: "Travel story deleted successfully" });
-// 	} catch (error) {
-// 		res.status(500).json({ error: true, message: error.message });
-// 	}
-// });
+		res.status(200).json({ message: "Travel story deleted successfully" });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
 
 // // Update isFavourite
 // app.put("/update-is-favourite/:id", authenticateToken, async (req, res) => {
