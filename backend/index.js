@@ -283,29 +283,29 @@ app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
 	}
 });
 
-// // Update isFavourite
-// app.put("/update-is-favourite/:id", authenticateToken, async (req, res) => {
-// 	const { id } = req.params;
-// 	const { isFavourite } = req.body;
-// 	const { userId } = req.user;
+// Update isFavourite
+app.put("/update-is-favourite/:id", authenticateToken, async (req, res) => {
+	const { id } = req.params;
+	const { isFavourite } = req.body;
+	const { userId } = req.user;
 
-// 	try {
-// 		const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
-// 		if (!travelStory) {
-// 			return res
-// 				.status(404)
-// 				.json({ error: true, message: "Travel story not found" });
-// 		}
+	try {
+		const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
+		if (!travelStory) {
+			return res
+				.status(404)
+				.json({ error: true, message: "Travel story not found" });
+		}
 
-// 		travelStory.isFavourite = isFavourite;
-// 		await travelStory.save();
-// 		res
-// 			.status(200)
-// 			.json({ story: travelStory, message: "Update Successfully" });
-// 	} catch (error) {
-// 		res.status(500).json({ error: true, message: error.message });
-// 	}
-// });
+		travelStory.isFavourite = isFavourite;
+		await travelStory.save();
+		res
+			.status(200)
+			.json({ story: travelStory, message: "Update Successfully" });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
 
 // // Search travel stories
 // app.get("/search", authenticateToken, async (req, res) => {
