@@ -115,7 +115,7 @@ const SignUp = () => {
               type="submit"
               className="btn-primary btn-light"
               onClick={() => {
-                navigate("/signUp");
+                navigate("/login");
               }}
             >
               LOGIN
