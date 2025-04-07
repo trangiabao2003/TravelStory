@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
 import PasswordInput from "../../components/input/PasswordInput";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +13,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+    // validate email
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       return;
