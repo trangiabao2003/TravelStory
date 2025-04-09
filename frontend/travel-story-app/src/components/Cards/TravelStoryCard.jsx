@@ -18,8 +18,16 @@ const TravelStoryCard = ({
       <img
         src={imgUrl}
         alt={title}
+        onClick={onClick}
         className="w-full h-56 object-cover rounded-lg"
       />
+
+      <button className="w-12 h12 flex items-center justify-center bg-white/40 rpunded-lg border border-white/30 absolute top-4 roght-4"
+      onClick={onFavouriteClicked}
+      >
+        <FaHeart className={`icon-btn ${isFavourite ? "text-red-500" : "text-white"}`}/>
+      </button>
+
       <div className="p-4" onClick={onClick}>
         <div className="flex items-center gap-3">
           <div className="flex-1">
@@ -33,7 +41,7 @@ const TravelStoryCard = ({
 
         <p className="text-xs text-slate-600 mt-2">{story?.slice(0, 60)}</p>
 
-        <div className="">
+        <div className="inline-flex items-center gap-2 text-[13px] text-cyan-600 bg-cyan-200/40 rounded mt-3 px-2 py-1">
           <GrMapLocation className="text-sm" />
           {visitedLocation.map((item, index) =>
             visitedLocation.length == index + 1 ? `${item}` : `${item}, `
