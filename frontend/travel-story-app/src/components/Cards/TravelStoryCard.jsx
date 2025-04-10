@@ -10,7 +10,7 @@ const TravelStoryCard = ({
   date,
   visitedLocation,
   isFavourite,
-  onFavouriteClicked,
+  onFavouriteClick,
   onClick,
 }) => {
   return (
@@ -23,7 +23,7 @@ const TravelStoryCard = ({
       />
 
       <button className="w-12 h12 flex items-center justify-center bg-white/40 rpunded-lg border border-white/30 absolute top-4 roght-4"
-      onClick={onFavouriteClicked}
+      onClick={onFavouriteClick}
       >
         <FaHeart className={`icon-btn ${isFavourite ? "text-red-500" : "text-white"}`}/>
       </button>
