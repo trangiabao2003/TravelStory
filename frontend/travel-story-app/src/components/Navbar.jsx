@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ProfileInfo from './Cards/ProfileInfo'
 
 const Navbar = ({ userInfo }) => {
-    const isTonken = localStorage.getItem("tonken")
+    const isTonken = localStorage.getItem("token")
     const navigate = useNavigate()
 
     const onLogout =() =>{
