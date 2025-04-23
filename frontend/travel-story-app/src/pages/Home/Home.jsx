@@ -128,9 +128,16 @@ const Home = () => {
           },
         }}
         appElement={document.getElementById("root")}
-        className="model-box"
+        className="modal-box"
       >
-        {/* <AddEditTravelStory /> */}
+        <AddEditTravelStory 
+        type={openAddEditModal.type}
+        storyInfo={openAddEditModal.data}
+        onClose={() => {
+          setOpenAddEditModal({ isShown: false, type: "add", data: null})
+        }}
+        getAllTravelStories={getAllTravelStories}
+        />
       </Modal>
 
       <button
