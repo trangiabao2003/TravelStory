@@ -14,11 +14,11 @@ const AddEditTravelStory = ({
   onClose,
   getAllTravelStories,
 }) => {
-  const [title, setTitle] = useState("");
-  const [storyImg, setStoryImg] = useState(null);
-  const [story, setStory] = useState("");
-  const [visitedLocation, setVisitedLocation] = useState([]);
-  const [visitedDate, setVisitedDate] = useState(null);
+  const [title, setTitle] = useState(storyInfo?.title ||"");
+  const [storyImg, setStoryImg] = useState(storyInfo?.imageUrl || null);
+  const [story, setStory] = useState(storyInfo?.storyInfo || "");
+  const [visitedLocation, setVisitedLocation] = useState(storyInfo?.visitedLocation || []);
+  const [visitedDate, setVisitedDate] = useState(storyInfo?.visitedDate || null);
 
   const [error, setError] = useState("");
 
@@ -52,12 +52,56 @@ const AddEditTravelStory = ({
         onClose()
       }
     } catch (error) {
-      toast.error("Error adding story: " + error.message);
-      }
+      if (error.response &&
+        error.response.data &&
+        error.response.data.message) {
+          setError(error.response.data.message);
+        } else {
+          // Handle unexpected error
+          setError("An unexpected error occurred. Please try again");
+        }
     };
-
+  }
   // Update Travel story
-  const updateTravelStory = async () => {};
+  const updateTravelStory = async () => {
+    try{
+      let imageUrl = "";
+
+      // Upload image if present
+      if (storyImg) {
+      const imgUploadRes = await upLoadImage(storyImg);
+      // Get image URL
+      imageUrl = imgUploadRes.imageUrl || "";
+      }
+
+      const response = await axiosInstance.post("/edit-story", {
+        title,
+        story,
+        imageUrl: imageUrl || "",
+        visitedLocation,
+        visitedDate: visitedDate
+        ? moment (visitedDate).valueOf()
+        : moment().valueOf(),
+      });
+
+      if (response.data && response.data.story) {
+        toast.success("Story Added Succesfully");
+        // Refresh stories
+        getAllTravelStories();
+        // Close modal or from
+        onClose()
+      }
+    } catch (error) {
+      if (error.response &&
+        error.response.data &&
+        error.response.data.message) {
+          setError(error.response.data.message);
+        } else {
+          // Handle unexpected error
+          setError("An unexpected error occurred. Please try again");
+        }
+  };
+}
 
   const HandleAddOrUpdateClick = () => {
     console.log("Input Data:", {
@@ -91,7 +135,7 @@ const AddEditTravelStory = ({
   const handleDeleteStoryImg = async () => {};
 
   return (
-    <div>
+    <div className="relative">
       <div className="flex items-center justify-between">
         <h5 className="text-xl font-medium text-slate-700">
           {type === "add" ? "Add Story" : "Upadte Story"}

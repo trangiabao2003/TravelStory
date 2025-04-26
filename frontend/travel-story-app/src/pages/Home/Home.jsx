@@ -9,6 +9,7 @@ import TravelStoryCard from "../../components/Cards/TravelStoryCard";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddEditTravelStory from "./AddEditTravelStory";
+import ViewTravelStory from "./ViewTravelStory";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -51,15 +52,20 @@ const Home = () => {
         setAllStories(response.data.stories);
       }
     } catch (error) {
-      console.log("An unexpected error occurred. Please try again");
+      console.log("An unexpected error occurred. Please try again", error);
     }
   };
 
   // Handle edit story click
-  const handleEdit = (data) => {};
+  const handleEdit = (data) => {
+    setOpenAddEditModal({ isShown: true, type: "edit", data: data });
+
+  };
 
   // Handle travel story click
-  const handleViewStory = (data) => {};
+  const handleViewStory = async (data) => {
+    setOpenViewModal({ isShown: true, data: data });
+  };
 
   // Handle update favorite
   const updateIsFavourite = async (storyData) => {
@@ -78,7 +84,7 @@ const Home = () => {
         getAllTravelStories();
       }
     } catch (error) {
-      console.log("An unexpected error occurred. Please try again");
+      console.log("An unexpected error occurred. Please try again", error);
     }
   };
 
@@ -143,6 +149,33 @@ const Home = () => {
         }}
         getAllTravelStories={getAllTravelStories}
         />
+      </Modal>
+
+       {/* {View travel story model} */}
+       <Modal
+        isOpen={openViewModal.isShown}
+        onRequestClose={() => {}}
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0,0,0,0.2)",
+            zIndex: 999,
+          },
+        }}
+        appElement={document.getElementById("root")}
+        className="modal-box"
+      >
+          <ViewTravelStory
+            storyInfo={openViewModal.data || null}
+              onClose={() => {
+                setOpenViewModal((prevState) => ({...prevState, isShown: false,}))
+              }}
+              onEditClick={() => {
+                setOpenViewModal((prevState) => ({...prevState, isShown: false,}))
+                handleEdit(openViewModal.data || null)
+              }}
+              onDeleteClick={() => {}
+            }
+          />
       </Modal>
 
       <button
