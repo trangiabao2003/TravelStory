@@ -3,6 +3,10 @@ import { MdAdd, MdDeleteOutline, MdUpdate, MdClose } from "react-icons/md";
 import DateSelector from "../../components/input/DateSelector";
 import ImageSelector from "../../components/input/ImageSelector";
 import TagInput from "../../components/input/TagInput";
+import moment from "moment";
+import { toast } from 'react-toastify';
+import axiosInstance from './../../utils/axiosInstance';
+import upLoadImage from "../../utils/uploadImage";
 
 const AddEditTravelStory = ({
   storyInfo,
@@ -18,35 +22,39 @@ const AddEditTravelStory = ({
 
   const [error, setError] = useState("");
 
-  // // Add New Travel Story
-  // const addNewTravelStory = async () => {
-  //   try{
-  //     let imageUrl = "";
+  // Add New Travel Story
+  const addNewTravelStory = async () => {
+    try{
+      let imageUrl = "";
 
-  //     // Upload image if present
-  //     if (storyImg) {
-  //     const imgUploadRes = await uploadImage(storyImg);
-  //     // Get image URL
-  //     imageUrl = imgUploadRes.imageUrl || "";
-  //     }
+      // Upload image if present
+      if (storyImg) {
+      const imgUploadRes = await upLoadImage(storyImg);
+      // Get image URL
+      imageUrl = imgUploadRes.imageUrl || "";
+      }
 
-  //     const response = await axiosInstance.post("/add-travel-story", {
-  //     title,
-  //     story,
-  //     imageUrl: imageUrl || ""
-  //     visitedLocation,
-  //     visitedDate: visitedDate
-  //     ? moment (visitedDate).valueOf()
-  //     : moment().valueOf(),
-  //     });
+      const response = await axiosInstance.post("/add-travel-story", {
+        title,
+        story,
+        imageUrl: imageUrl || "",
+        visitedLocation,
+        visitedDate: visitedDate
+        ? moment (visitedDate).valueOf()
+        : moment().valueOf(),
+      });
 
-  //     if (response.data && response.data.story){
+      if (response.data && response.data.story) {
+        toast.success("Story Added Succesfully");
+        // Refresh stories
+        getAllTravelStories();
+        // Close modal or from
+        onClose()
+      }
+    } catch (error) {
 
-  //     }
-  //   } catch (error) {
-
-  //     }
-    // };
+      }
+    };
 
   // Update Travel story
   const updateTravelStory = async () => {};
