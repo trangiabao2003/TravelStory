@@ -52,7 +52,7 @@ const AddEditTravelStory = ({
         onClose()
       }
     } catch (error) {
-
+      toast.error("Error adding story: " + error.message);
       }
     };
 

@@ -22,6 +22,11 @@ const Home = () => {
     data: null,
   });
 
+  const [openViewModal, setOpenViewModal] = useState({
+    isShown: false,
+    data: null,
+  });
+
   // Get User Info
   const getUserInfo = async () => {
     try {
