@@ -5,8 +5,9 @@ import ImageSelector from "../../components/input/ImageSelector";
 import TagInput from "../../components/input/TagInput";
 import moment from "moment";
 import { toast } from 'react-toastify';
+import PropTypes from 'prop-types';
 import axiosInstance from './../../utils/axiosInstance';
-import upLoadImage from "../../utils/uploadImage";
+import uploadImage from "../../utils/uploadImage";
 
 const AddEditTravelStory = ({
   storyInfo,
@@ -16,7 +17,7 @@ const AddEditTravelStory = ({
 }) => {
   const [title, setTitle] = useState(storyInfo?.title ||"");
   const [storyImg, setStoryImg] = useState(storyInfo?.imageUrl || null);
-  const [story, setStory] = useState(storyInfo?.storyInfo || "");
+  const [story, setStory] = useState(storyInfo?.story || "");
   const [visitedLocation, setVisitedLocation] = useState(storyInfo?.visitedLocation || []);
   const [visitedDate, setVisitedDate] = useState(storyInfo?.visitedDate || null);
 
@@ -29,7 +30,7 @@ const AddEditTravelStory = ({
 
       // Upload image if present
       if (storyImg) {
-      const imgUploadRes = await upLoadImage(storyImg);
+      const imgUploadRes = await uploadImage(storyImg);
       // Get image URL
       imageUrl = imgUploadRes.imageUrl || "";
       }
@@ -64,28 +65,36 @@ const AddEditTravelStory = ({
   }
   // Update Travel story
   const updateTravelStory = async () => {
+    const storyId = storyInfo._id;
+
     try{
       let imageUrl = "";
 
-      // Upload image if present
-      if (storyImg) {
-      const imgUploadRes = await upLoadImage(storyImg);
-      // Get image URL
-      imageUrl = imgUploadRes.imageUrl || "";
-      }
-
-      const response = await axiosInstance.post("/edit-story", {
+      let postData = {
         title,
         story,
-        imageUrl: imageUrl || "",
+        imageUrl: storyInfo.imageUrl || "",
         visitedLocation,
         visitedDate: visitedDate
-        ? moment (visitedDate).valueOf()
+        ? moment(visitedDate).valueOf()
         : moment().valueOf(),
-      });
+      }
+
+      if (typeof storyImg === "object") {
+        //Upload new image
+        const imgUploadRes = await uploadImage(storyImg)
+        imageUrl = imgUploadRes?.imageUrl || ""
+
+        postData = {
+          ...postData,
+          imageUrl: imageUrl
+        }
+      }
+
+      const response = await axiosInstance.put("/edit-story/" + storyId, postData);
 
       if (response.data && response.data.story) {
-        toast.success("Story Added Succesfully");
+        toast.success("Story Updated Succesfully");
         // Refresh stories
         getAllTravelStories();
         // Close modal or from
@@ -132,7 +141,31 @@ const AddEditTravelStory = ({
   };
 
   //Delete story image and Update the story
-  const handleDeleteStoryImg = async () => {};
+  const handleDeleteStoryImg = async () => {
+  //   // Delete the image
+  //   const deleteImgRes = await axiosInstance.delete("/delete-image", {
+  //     params: {
+  //       imageUrl: storyInfo.imageUrl,
+  //     }
+  // });
+
+  // if (deleteImgRes.data) {
+  //   const storyId = storyInfo._id;
+
+  //   let postData = {
+  //     title,
+  //     story,
+  //     visitedLocation,
+  //     visitedDate: moment().valueOf(),
+  //     imageUrl: "",
+  //   };
+    
+  //   // Updating story
+  //   const response = await axiosInstance.put("/edit-story/" + storyId, postData);
+  //   setStoryImg(null);
+  // }
+}
+    
 
   return (
     <div className="relative">
@@ -206,6 +239,19 @@ const AddEditTravelStory = ({
       </div>
     </div>
   );
+};
+AddEditTravelStory.propTypes = {
+  storyInfo: PropTypes.shape({
+    _id: PropTypes.string,
+    title: PropTypes.string,
+    imageUrl: PropTypes.string,
+    story: PropTypes.string,
+    visitedLocation: PropTypes.arrayOf(PropTypes.string),
+    visitedDate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }),
+  type: PropTypes.oneOf(['add', 'edit']).isRequired,
+  onClose: PropTypes.func.isRequired,
+  getAllTravelStories: PropTypes.func.isRequired,
 };
 
 export default AddEditTravelStory;
