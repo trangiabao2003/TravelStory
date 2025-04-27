@@ -10,12 +10,17 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddEditTravelStory from "./AddEditTravelStory";
 import ViewTravelStory from "./ViewTravelStory";
+import EmptyCard from "../../components/Cards/EmptyCard";
+
+import EmptyImage from '../../assets/images/emptycard.svg'
 
 const Home = () => {
   const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState(null);
   const [allStories, setAllStories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("");
 
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
@@ -104,6 +109,28 @@ const Home = () => {
     }
   }
 
+  // Search story
+  const onSearchStory = async (query) => {
+    try {
+      const response = await axiosInstance.get("/search", {
+        params: { query },
+      });
+      if (response.data && response.data.stories) {
+        setFilterType('search')
+        setAllStories(response.data.stories);
+      }
+    } catch (error) {
+      /// Handle search input change
+      console.log("An unexpected error occurred. Please try again", error);
+    }
+  }
+
+  // Clear search input
+  const handleClearSearch = () => {
+    setFilterType(""); 
+    getAllTravelStories();
+  };
+
   useEffect(() => {
     getAllTravelStories();
     getUserInfo();
@@ -112,7 +139,13 @@ const Home = () => {
   }, []);
   return (
     <>
-      <Navbar userInfo={userInfo} />
+      <Navbar 
+        userInfo={userInfo}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSearchNote={onSearchStory}
+        handleClearSearch={handleClearSearch}
+      />
       <div className="container mx-auto py-10">
         <div className="flex gap-7">
           <div className="flex-1">
@@ -136,7 +169,7 @@ const Home = () => {
                 })}
               </div>
             ) : (
-              <>Empty Card here</>
+              <EmptyCard imgSrc={EmptyImage} message={`Start creating your first Travel Story! Click the 'Add' button to down your thoughts, ideas and memories. Let's get started!`}/>
             )}
           </div>
 
