@@ -12,7 +12,9 @@ import AddEditTravelStory from "./AddEditTravelStory";
 import ViewTravelStory from "./ViewTravelStory";
 import EmptyCard from "../../components/Cards/EmptyCard";
 
-import EmptyImage from '../../assets/images/emptycard.svg'
+import EmptyImage from "../../assets/images/emptycard.svg";
+import { DayPicker } from "react-day-picker";
+import moment from "moment";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -20,7 +22,8 @@ const Home = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [allStories, setAllStories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState("");
+  // const [filterType, setFilterType] = useState("");
+  const [dateRange, setDateRange] = useState({ from: null, to: null });
 
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
@@ -64,7 +67,6 @@ const Home = () => {
   // Handle edit story click
   const handleEdit = (data) => {
     setOpenAddEditModal({ isShown: true, type: "edit", data: data });
-
   };
 
   // Handle travel story click
@@ -101,13 +103,13 @@ const Home = () => {
       const response = await axiosInstance.delete("/delete-story/" + storyId);
       if (response.data && !response.data.error) {
         toast.error("Story Deleted Successfully");
-        setOpenViewModal((prevState) => ({ ...prevState, isShown: false}));
+        setOpenViewModal((prevState) => ({ ...prevState, isShown: false }));
         getAllTravelStories();
       }
     } catch (error) {
       console.log("An unexpected error occurred. Please try again", error);
     }
-  }
+  };
 
   // Search story
   const onSearchStory = async (query) => {
@@ -116,19 +118,46 @@ const Home = () => {
         params: { query },
       });
       if (response.data && response.data.stories) {
-        setFilterType('search')
+        setFilterType("search");
         setAllStories(response.data.stories);
       }
     } catch (error) {
       /// Handle search input change
       console.log("An unexpected error occurred. Please try again", error);
     }
-  }
+  };
 
   // Clear search input
   const handleClearSearch = () => {
-    setFilterType(""); 
+    setFilterType("");
     getAllTravelStories();
+  };
+
+  // Handle Filter Travel Story by date range
+  // const filterStoriesByDate = async (day) => {
+    // try {
+    //   const startDate = day.from ? moment(day.from).valueOf() : null;
+    //   const endDate = day.to ? moment(day.to).valueOf() : null;
+
+    //   if (startDate && endDate) {
+    //     const response = await axiosInstance.get("/travel-stories/filter", {
+    //       params: { startDate, endDate },
+    //     });
+
+    //     if (response.data && response.data.stories) {
+    //       setFilterType("date");
+    //       setAllStories(response.data.stories);
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.log("An unexpected error occurred. Please try again", error);
+    // }
+  // };
+
+  // Handle Date range select
+  const handleDayCLick = (day) => {
+    // setDateRange(day);
+    // filterStoriesByDate(day);
   };
 
   useEffect(() => {
@@ -139,7 +168,7 @@ const Home = () => {
   }, []);
   return (
     <>
-      <Navbar 
+      <Navbar
         userInfo={userInfo}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -161,7 +190,6 @@ const Home = () => {
                       date={item.visitedDate}
                       visitedLocation={item.visitedLocation}
                       isFavourite={item.isFavourite}
-                      onEdit={() => handleEdit(item)}
                       onClick={() => handleViewStory(item)}
                       onFavouriteClick={() => updateIsFavourite(item)}
                     />
@@ -169,11 +197,26 @@ const Home = () => {
                 })}
               </div>
             ) : (
-              <EmptyCard imgSrc={EmptyImage} message={`Start creating your first Travel Story! Click the 'Add' button to down your thoughts, ideas and memories. Let's get started!`}/>
+              <EmptyCard
+                imgSrc={EmptyImage}
+                message={`Start creating your first Travel Story! Click the 'Add' button to down your thoughts, ideas and memories. Let's get started!`}
+              />
             )}
           </div>
 
-          <div className="w-[320px]"></div>
+          <div className="w-[330px]">
+            <div className="bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg">
+              <div className="p-3">
+                <DayPicker
+                  captionLayout="dropdown-buttons"
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleDayCLick}
+                  pageNavigation
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -190,18 +233,18 @@ const Home = () => {
         appElement={document.getElementById("root")}
         className="modal-box"
       >
-        <AddEditTravelStory 
-        type={openAddEditModal.type}
-        storyInfo={openAddEditModal.data}
-        onClose={() => {
-          setOpenAddEditModal({ isShown: false, type: "add", data: null})
-        }}
-        getAllTravelStories={getAllTravelStories}
+        <AddEditTravelStory
+          type={openAddEditModal.type}
+          storyInfo={openAddEditModal.data}
+          onClose={() => {
+            setOpenAddEditModal({ isShown: false, type: "add", data: null });
+          }}
+          getAllTravelStories={getAllTravelStories}
         />
       </Modal>
 
-       {/* {View travel story model} */}
-       <Modal
+      {/* {View travel story model} */}
+      <Modal
         isOpen={openViewModal.isShown}
         onRequestClose={() => {}}
         style={{
@@ -213,20 +256,19 @@ const Home = () => {
         appElement={document.getElementById("root")}
         className="modal-box"
       >
-          <ViewTravelStory
-            storyInfo={openViewModal.data || null}
-              onClose={() => {
-                setOpenViewModal((prevState) => ({...prevState, isShown: false,}))
-              }}
-              onEditClick={() => {
-                setOpenViewModal((prevState) => ({...prevState, isShown: false,}))
-                handleEdit(openViewModal.data || null)
-              }}
-              onDeleteClick={() => {
-                deleteTravelStory(openViewModal.data || null)
-              }
-            }
-          />
+        <ViewTravelStory
+          storyInfo={openViewModal.data || null}
+          onClose={() => {
+            setOpenViewModal((prevState) => ({ ...prevState, isShown: false }));
+          }}
+          onEditClick={() => {
+            setOpenViewModal((prevState) => ({ ...prevState, isShown: false }));
+            handleEdit(openViewModal.data || null);
+          }}
+          onDeleteClick={() => {
+            deleteTravelStory(openViewModal.data || null);
+          }}
+        />
       </Modal>
 
       <button
