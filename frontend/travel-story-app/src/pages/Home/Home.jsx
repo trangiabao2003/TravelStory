@@ -15,6 +15,7 @@ import EmptyCard from "../../components/Cards/EmptyCard";
 import EmptyImage from "../../assets/images/emptycard.svg";
 import { DayPicker } from "react-day-picker";
 import moment from "moment";
+// import FilterInforTitle from "../../components/Cards/FilterInforTitle";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Home = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [allStories, setAllStories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  // const [filterType, setFilterType] = useState("");
+  const [filterType, setFilterType] = useState("");
   const [dateRange, setDateRange] = useState({ from: null, to: null });
 
   const [openAddEditModal, setOpenAddEditModal] = useState({
@@ -134,31 +135,38 @@ const Home = () => {
   };
 
   // Handle Filter Travel Story by date range
-  // const filterStoriesByDate = async (day) => {
-    // try {
-    //   const startDate = day.from ? moment(day.from).valueOf() : null;
-    //   const endDate = day.to ? moment(day.to).valueOf() : null;
+  const filterStoriesByDate = async (day) => {
+    try {
+      const startDate = day.from ? moment(day.from).valueOf() : null;
+      const endDate = day.to ? moment(day.to).valueOf() : null;
 
-    //   if (startDate && endDate) {
-    //     const response = await axiosInstance.get("/travel-stories/filter", {
-    //       params: { startDate, endDate },
-    //     });
+      if (startDate && endDate) {
+        const response = await axiosInstance.get("/travel-stories/filter", {
+          params: { startDate, endDate },
+        });
 
-    //     if (response.data && response.data.stories) {
-    //       setFilterType("date");
-    //       setAllStories(response.data.stories);
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.log("An unexpected error occurred. Please try again", error);
-    // }
-  // };
+        if (response.data && response.data.stories) {
+          setFilterType("date");
+          setAllStories(response.data.stories);
+        }
+      }
+    } catch (error) {
+      console.log("An unexpected error occurred. Please try again", error);
+    }
+  };
 
   // Handle Date range select
   const handleDayCLick = (day) => {
-    // setDateRange(day);
-    // filterStoriesByDate(day);
+    setDateRange(day);
+    filterStoriesByDate(day);
   };
+
+//  const resetFilter = () => {
+//   // Reset filter
+//   setDateRange({datata: null, to: null });
+//   setFilterType("")
+//   getAllTravelStories()
+//  }
 
   useEffect(() => {
     getAllTravelStories();
@@ -176,6 +184,13 @@ const Home = () => {
         handleClearSearch={handleClearSearch}
       />
       <div className="container mx-auto py-10">
+
+      {/* <FilterInforTitle
+        filterType={filterType}
+        filterDates={dateRange}
+        onClear={() => {resetFilter()}}
+      /> */}
+
         <div className="flex gap-7">
           <div className="flex-1">
             {allStories.length > 0 ? (
