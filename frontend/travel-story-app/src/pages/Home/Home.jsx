@@ -12,10 +12,10 @@ import AddEditTravelStory from "./AddEditTravelStory";
 import ViewTravelStory from "./ViewTravelStory";
 import EmptyCard from "../../components/Cards/EmptyCard";
 
-import EmptyImage from "../../assets/images/emptycard.svg";
 import { DayPicker } from "react-day-picker";
 import moment from "moment";
-// import FilterInforTitle from "../../components/Cards/FilterInforTitle";
+import FilterInforTitle from "../../components/Cards/FilterInforTitle";
+import { getEmptyCardImg, getEmptyCardMessage } from "../../utils/helper";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -89,7 +89,14 @@ const Home = () => {
 
       if (response.data && response.data.story) {
         toast.success("Story Updated Successfully");
-        getAllTravelStories();
+
+        if (filterType === "search") {
+          onSearchStory(searchQuery);
+        } else if (filterType === "date") {
+          filterStoriesByDate(dateRange);
+        } else {
+          getAllTravelStories();
+        }
       }
     } catch (error) {
       console.log("An unexpected error occurred. Please try again", error);
@@ -161,13 +168,12 @@ const Home = () => {
     filterStoriesByDate(day);
   };
 
-//  const resetFilter = () => {
-//   // Reset filter
-//   setDateRange({datata: null, to: null });
-//   setFilterType("")
-//   getAllTravelStories()
-//  }
-
+  const resetFilter = () => {
+    // Reset filter
+    setDateRange({ datata: null, to: null });
+    setFilterType("");
+    getAllTravelStories();
+  };
   useEffect(() => {
     getAllTravelStories();
     getUserInfo();
@@ -184,12 +190,13 @@ const Home = () => {
         handleClearSearch={handleClearSearch}
       />
       <div className="container mx-auto py-10">
-
-      {/* <FilterInforTitle
-        filterType={filterType}
-        filterDates={dateRange}
-        onClear={() => {resetFilter()}}
-      /> */}
+        <FilterInforTitle
+          filterType={filterType}
+          filterDates={dateRange}
+          onClear={() => {
+            resetFilter();
+          }}
+        />
 
         <div className="flex gap-7">
           <div className="flex-1">
@@ -213,8 +220,8 @@ const Home = () => {
               </div>
             ) : (
               <EmptyCard
-                imgSrc={EmptyImage}
-                message={`Start creating your first Travel Story! Click the 'Add' button to down your thoughts, ideas and memories. Let's get started!`}
+                imgSrc={getEmptyCardImg(filterType)}
+                message={getEmptyCardMessage(filterType)}
               />
             )}
           </div>
