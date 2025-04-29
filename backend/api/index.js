@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const config = require("./config.json");
+const config = require("../config.json");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const express = require("express");
@@ -8,10 +8,10 @@ const cors = require("cors");
 const serverless = require("serverless-http");
 const jwt = require("jsonwebtoken");
 
-const User = require("./models/user.model");
-const TravelStory = require("./models/travelStory.model");
-const { authenticateToken } = require("./utilities");
-const upload = require("./multer");
+const User = require("../models/user.model");
+const TravelStory = require("../models/travelStory.model");
+const { authenticateToken } = require("../utilities");
+const upload = require("../multer");
 const fs = require("fs");
 const path = require("path");
 
