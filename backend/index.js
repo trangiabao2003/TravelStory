@@ -14,11 +14,32 @@ const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
 
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+	api_key: process.env.CLOUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 mongoose.connect(config.connectionString);
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+// app.use(cors({ origin: "*" }));
+app.use(
+	cors({
+		origin: ["http://localhost:5173", "https://travel-story-fe.vercel.app"],
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		credentials: true, // Nếu dùng cookie hoặc xác thực
+		allowedHeaders: ["Content-Type", "Authorization"],
+	})
+);
+app.options("*", cors());
+
+app.get("/", async (req, res) => {
+	res.send("Hello from backend!");
+});
 
 // Create Account
 app.post("/create-account", async (req, res) => {
@@ -112,10 +133,23 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
 				.status(400)
 				.json({ error: true, message: "No image uploaded" });
 		}
+		const result = await cloudinary.uploader
+			.upload_stream(
+				{ folder: "travel-stories" }, // Tùy chọn: lưu ảnh trong thư mục 'travel-stories' trên Cloudinary
+				(error, result) => {
+					if (error) {
+						return res
+							.status(500)
+							.json({ error: true, message: "Upload to Cloudinary failed" });
+					}
+					res.status(201).json({ imageUrl: result.secure_url });
+				}
+			)
+			.end(req.file.buffer);
 
-		const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+		// const imageUrl = `./uploads/${req.file.filename}`;
 
-		res.status(201).json({ imageUrl });
+		// res.status(201).json({ imageUrl });
 	} catch (error) {
 		res.status(500).json({ error: true, message: error.message });
 	}
@@ -132,27 +166,31 @@ app.delete("/delete-image", async (req, res) => {
 	}
 
 	try {
-		// Extract the filename from the imageUrl
-		const filename = path.basename(imageUrl);
+		// // Extract the filename from the imageUrl
+		// const filename = path.basename(imageUrl);
 
-		// Define the file path
-		const filePath = path.join(__dirname, "uploads", filename);
+		// // Define the file path
+		// const filePath = path.join(__dirname, "uploads", filename);
 
-		// Check if the file exists
-		if (fs.existsSync(filePath)) {
-			// Delete the file from the uploads folder
-			fs.unlinkSync(filePath);
-			res.status(200).json({ message: "Image deleted successfully" });
-		} else {
-			res.status(200).json({ error: true, message: "Image not found" });
-		}
+		// // Check if the file exists
+		// if (fs.existsSync(filePath)) {
+		// 	// Delete the file from the uploads folder
+		// 	fs.unlinkSync(filePath);
+		// 	res.status(200).json({ message: "Image deleted successfully" });
+		// } else {
+		// 	res.status(200).json({ error: true, message: "Image not found" });
+		// }
+		// Lấy public_id từ URL của Cloudinary
+		const publicId = imageUrl.split("/").slice(-1)[0].split(".")[0]; // Ví dụ: 'travel-stories/filename'
+		await cloudinary.uploader.destroy(`travel-stories/${publicId}`);
+		res.status(200).json({ message: "Image deleted successfully" });
 	} catch (error) {
 		res.status(500).json({ error: true, message: error.message });
 	}
 });
 
 // Serve static files from the uploads and assets directory
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 // Add Travel Story
@@ -226,7 +264,7 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
 				.json({ error: true, message: "Travel story not found" });
 		}
 
-		const placeholderImgUrl = `http://localhost:8000/assets/placeholder.png`;
+		const placeholderImgUrl = `./assets/placeholder.png`;
 
 		travelStory.title = title;
 		travelStory.story = story;
@@ -258,24 +296,36 @@ app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
 				.json({ error: true, message: "Travel story not found" });
 		}
 
+		// Xóa ảnh từ Cloudinary
+		if (
+			travelStory.imageUrl &&
+			!travelStory.imageUrl.includes("placeholder.png")
+		) {
+			const publicId = travelStory.imageUrl
+				.split("/")
+				.slice(-1)[0]
+				.split(".")[0];
+			await cloudinary.uploader.destroy(`travel-stories/${publicId}`);
+		}
+
 		// Delete the travel story from the database
 		await travelStory.deleteOne({ _id: id, userId: userId });
 
-		// Extract the filename from the imageUrl
-		const imageUrl = travelStory.imageUrl;
-		const filename = path.basename(imageUrl);
+		// // Extract the filename from the imageUrl
+		// const imageUrl = travelStory.imageUrl;
+		// const filename = path.basename(imageUrl);
 
-		// Define the file path
-		const filePath = path.join(__dirname, "uploads", filename);
+		// // Define the file path
+		// const filePath = path.join(__dirname, "uploads", filename);
 
-		// Delete the image file from the uploads folder
-		fs.unlinkSync(filePath, (err) => {
-			if (err) {
-				console.error("Failed to delete image file:", err);
-				// Optionally, you could still respond with a success status here
-				// If you don't want to treat this as a critical error
-			}
-		});
+		// // Delete the image file from the uploads folder
+		// fs.unlinkSync(filePath, (err) => {
+		// 	if (err) {
+		// 		console.error("Failed to delete image file:", err);
+		// 		// Optionally, you could still respond with a success status here
+		// 		// If you don't want to treat this as a critical error
+		// 	}
+		// });
 
 		res.status(200).json({ message: "Travel story deleted successfully" });
 	} catch (error) {
@@ -354,5 +404,6 @@ app.get("/travel-stories/filter", authenticateToken, async (req, res) => {
 	}
 });
 
-app.listen(8000);
+const port = process.env.PORT || 8000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
 module.exports = app;
